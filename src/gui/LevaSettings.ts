@@ -15,13 +15,13 @@ export const levaSettings = {
       name: "Ground",
       settings: {
         rotation: {
-          x: 0,
+          x: -1.7,
           y: 0.0,
           z: 0.0,
         },
         scale: {
-          x: 5.0,
-          y: 7.5,
+          x: 50.0,
+          y: 70.5,
           z: 2.0,
         },
         color: "#ffa77b",
