@@ -9,7 +9,7 @@ const Ground: React.FC<Props> = ({}) => {
 
   return (
     <mesh receiveShadow>
-      <boxGeometry args={[100, 1, 100]} />
+      <boxGeometry args={[100, 0.1, 100]} />
       <meshStandardMaterial color={settings.color} />
     </mesh>
   );
