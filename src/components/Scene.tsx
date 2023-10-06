@@ -7,12 +7,10 @@ type Props = {};
 
 const Scene: React.FC<Props> = ({}) => {
   return (
-    <>
-      <Physics colliders={false}>
-        <Ground />
-        <AlienShip />
-      </Physics>
-    </>
+    <Physics colliders={false}>
+      <Ground />
+      <AlienShip />
+    </Physics>
   );
 };
 export default Scene;
