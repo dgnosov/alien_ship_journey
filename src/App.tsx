@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { KeyboardControls, OrbitControls } from "@react-three/drei";
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
@@ -24,29 +24,40 @@ function App() {
   });
 
   return (
-    <Canvas camera={{ fov: cameraCrl.fov }} shadows>
-      <Scene />
-      <directionalLight
-        visible={directionalCtl.visible}
-        position={[
-          directionalCtl.position.x,
-          directionalCtl.position.y,
-          directionalCtl.position.z,
-        ]}
-        castShadow={directionalCtl.castShadow}
-      />
-      <ambientLight />
-      <OrbitControls
-        minDistance={cameraCrl.minDistance}
-        maxDistance={cameraCrl.maxDistance}
-        enableDamping={true}
-        enableRotate={false}
-        dampingFactor={cameraCrl.dampingFactor}
-        screenSpacePanning={true}
-        maxPolarAngle={Math.PI / cameraCrl.camera_angle}
-        minPolarAngle={Math.PI / cameraCrl.camera_angle}
-      />
-    </Canvas>
+    <KeyboardControls
+      map={[
+        { name: "forward", keys: ["ArrowUp", "KeyW"] },
+        { name: "backward", keys: ["ArrowDown", "KeyS"] },
+        { name: "leftward", keys: ["ArrowLeft", "KeyA"] },
+        { name: "rightward", keys: ["ArrowRight", "KeyD"] },
+        { name: "portal", keys: ["Space"] },
+      ]}
+    >
+      <Canvas camera={{ fov: cameraCrl.fov }} shadows>
+        <Scene />
+
+        <directionalLight
+          visible={directionalCtl.visible}
+          position={[
+            directionalCtl.position.x,
+            directionalCtl.position.y,
+            directionalCtl.position.z,
+          ]}
+          castShadow={directionalCtl.castShadow}
+        />
+        <ambientLight />
+        <OrbitControls
+          minDistance={cameraCrl.minDistance}
+          maxDistance={cameraCrl.maxDistance}
+          enableDamping={true}
+          enableRotate={false}
+          dampingFactor={cameraCrl.dampingFactor}
+          screenSpacePanning={true}
+          maxPolarAngle={Math.PI / cameraCrl.camera_angle}
+          minPolarAngle={Math.PI / cameraCrl.camera_angle}
+        />
+      </Canvas>
+    </KeyboardControls>
   );
 }
 
