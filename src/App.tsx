@@ -2,30 +2,49 @@ import { OrbitControls } from "@react-three/drei";
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
-
-// min and max Polar Angle sets the camera field of view
-const enum CameraSettings {
-  camera_angle = 4,
-  fov = 40,
-  minDistance = 10,
-  maxDistance = 14,
-  dampingFactor = 0.05,
-}
+import { useControls } from "leva";
 
 function App() {
+  const cameraCrl = useControls("Camera", {
+    camera_angle: 3,
+    minDistance: 10,
+    maxDistance: 14,
+    dampingFactor: 0.05,
+    fov: 40,
+  });
+
+  const directionalCtl = useControls("Directional Light", {
+    visible: true,
+    position: {
+      x: -1.0,
+      y: 4.4,
+      z: 2.5,
+    },
+    castShadow: true,
+  });
+
   return (
-    <Canvas camera={{ fov: CameraSettings.fov }}>
+    <Canvas camera={{ fov: cameraCrl.fov }} shadows>
       <Scene />
+      <directionalLight
+        visible={directionalCtl.visible}
+        position={[
+          directionalCtl.position.x,
+          directionalCtl.position.y,
+          directionalCtl.position.z,
+        ]}
+        castShadow={directionalCtl.castShadow}
+      />
       <ambientLight />
       <OrbitControls
-        minDistance={CameraSettings.minDistance}
-        maxDistance={CameraSettings.maxDistance}
+        minDistance={cameraCrl.minDistance}
+        maxDistance={cameraCrl.maxDistance}
         enableDamping={true}
         enableRotate={false}
-        dampingFactor={CameraSettings.dampingFactor}
+        dampingFactor={cameraCrl.dampingFactor}
         screenSpacePanning={true}
-        maxPolarAngle={Math.PI / CameraSettings.camera_angle}
-        minPolarAngle={Math.PI / CameraSettings.camera_angle}
+        maxPolarAngle={Math.PI / cameraCrl.camera_angle}
+        minPolarAngle={Math.PI / cameraCrl.camera_angle}
       />
     </Canvas>
   );
