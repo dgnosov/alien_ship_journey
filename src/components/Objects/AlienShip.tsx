@@ -50,7 +50,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
     const impulse = { x: 0, y: 0, z: 0 };
     const torgue = { x: 0, y: 0, z: 0 };
 
-    const impulseStrength = 0.6 * delta;
+    const impulseStrength = 0.4 * delta;
     const torgueStrength = 0.2 * delta;
 
     if (forward) {
@@ -79,6 +79,28 @@ const AlienShip: React.FC<IProps> = ({}) => {
 
     spaceshipRB.current?.applyImpulse(impulse, true);
     spaceshipRB.current?.applyTorqueImpulse(torgue, true);
+
+    // Get current rotation coords (The coords after torque)
+    const getSpaceshipRBRotationCoords = spaceshipRB.current?.rotation();
+
+    if (!getSpaceshipRBRotationCoords) return;
+
+    // Convert coords for setRotation method
+    const convertRotationCoords = {
+      x: getSpaceshipRBRotationCoords?.x,
+      y: getSpaceshipRBRotationCoords?.y,
+      z: getSpaceshipRBRotationCoords?.z,
+      w: getSpaceshipRBRotationCoords.w,
+    };
+
+    // We need to work with Y axis
+    // Initial rotation coords of Alien sheep is {x: 0, y: 0, z: 0}
+    // After torque aproxiamte coords is the following {x: 0.55512, y: 0.132154, z: 0.087879}
+    // So we need smoothly reset it to 0
+    // In this case we use -= delta
+    convertRotationCoords.y -= delta;
+
+    spaceshipRB.current?.setRotation(convertRotationCoords, true);
   });
 
   return (
@@ -86,7 +108,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
       gravityScale={0}
       ref={spaceshipRB}
       colliders="hull"
-      restitution={0.2}
+      restitution={1}
       linearDamping={0.5}
       angularDamping={2}
       position={[2, 2, 1]}
@@ -98,6 +120,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
           geometry={nodes.spaceship.geometry}
           material={materials.metalic}
         />
+
         <mesh
           castShadow
           receiveShadow
