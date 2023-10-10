@@ -1,9 +1,10 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import { Group, Mesh, ShaderMaterial } from "three";
+import { useRef, useState } from "react";
+import { Group, Mesh, ShaderMaterial, Vector3 } from "three";
 import { GLTF } from "three-stdlib";
 import { RapierRigidBody, RigidBody } from "@react-three/rapier";
+import { useControls } from "leva";
 
 interface IProps {}
 
@@ -29,6 +30,24 @@ const AlienShip: React.FC<IProps> = ({}) => {
   const spaceshipRB = useRef<RapierRigidBody>(null);
   const spaceshipGroup = useRef<Group>(null!);
   const [_, getKeys] = useKeyboardControls();
+  const [smoothedCameraPosition] = useState(() => new Vector3());
+  const [smoothedCameraTarget] = useState(() => new Vector3());
+
+  // Value for better smootheffect on camera and space ship movement
+  const [smoothIndex] = useState(3);
+
+  const settings = useControls("Camera", {
+    camera: {
+      y: 10,
+      z: 10,
+      x: 0,
+    },
+    cameraTarget: {
+      y: 0.5,
+      z: 0.5,
+      x: 0,
+    },
+  });
 
   useFrame((state, delta) => {
     /**
@@ -80,6 +99,34 @@ const AlienShip: React.FC<IProps> = ({}) => {
     spaceshipRB.current?.applyImpulse(impulse, true);
     spaceshipRB.current?.applyTorqueImpulse(torgue, true);
 
+    /**
+     * Camera position
+     */
+    const spaceShipPosition = spaceshipRB.current?.translation();
+    if (!spaceShipPosition) return;
+
+    const cameraPosition = new Vector3();
+    cameraPosition.copy(spaceShipPosition as Vector3);
+    cameraPosition.z += settings.camera.z;
+    cameraPosition.y += settings.camera.y;
+    cameraPosition.x += settings.camera.x;
+
+    const cameraTarget = new Vector3();
+    cameraTarget.copy(spaceShipPosition as Vector3);
+    cameraTarget.z = settings.cameraTarget.z;
+    cameraTarget.x = settings.cameraTarget.x;
+    cameraTarget.y = settings.cameraTarget.y;
+
+    smoothedCameraPosition.lerp(cameraPosition, smoothIndex * delta);
+    smoothedCameraTarget.lerp(cameraPosition, smoothIndex * delta);
+
+    smoothedCameraTarget.z -= settings.cameraTarget.z;
+    smoothedCameraTarget.y -= settings.cameraTarget.y;
+    smoothedCameraTarget.x -= settings.cameraTarget.x;
+
+    state.camera.position.copy(smoothedCameraPosition);
+    state.camera.lookAt(smoothedCameraTarget);
+
     // Get current rotation coords (The coords after torque)
     const getSpaceshipRBRotationCoords = spaceshipRB.current?.rotation();
 
@@ -111,16 +158,15 @@ const AlienShip: React.FC<IProps> = ({}) => {
       restitution={1}
       linearDamping={0.5}
       angularDamping={2}
-      position={[2, 2, 1]}
+      position={[1, 1, 1]}
     >
-      <group ref={spaceshipGroup} dispose={null} scale={0.3}>
+      <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
         <mesh
           castShadow
           receiveShadow
           geometry={nodes.spaceship.geometry}
           material={materials.metalic}
         />
-
         <mesh
           castShadow
           receiveShadow
