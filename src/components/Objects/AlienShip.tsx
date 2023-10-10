@@ -38,12 +38,12 @@ const AlienShip: React.FC<IProps> = ({}) => {
 
   const settings = useControls("Camera", {
     camera: {
-      y: 10,
-      z: 10,
+      y: 5,
+      z: 11,
       x: 0,
     },
     cameraTarget: {
-      y: 0.5,
+      y: 0.35,
       z: 0.5,
       x: 0,
     },
