@@ -3,6 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Mesh, ShaderMaterial } from "three";
 import { RigidBody } from "@react-three/rapier";
+import { useControls } from "leva";
 
 interface IProps {}
 
@@ -42,18 +43,23 @@ type GLTFResult = GLTF & {
 const Cow: React.FC<IProps> = ({}) => {
   const { nodes, materials } = useGLTF("./models/cow.glb") as GLTFResult;
 
+  const cowsPosition = useControls("Cows positions", {
+    position: { min: 1, max: 20, value: 20, step: 1 },
+  });
+
   return (
     <RigidBody
-      gravityScale={0}
+      gravityScale={4}
       colliders="hull"
       restitution={1}
       linearDamping={0.5}
       angularDamping={2}
       position={[
-        Math.random() * CowSettings.positionRadius,
+        -(cowsPosition.position / 2) + Math.random() * cowsPosition.position,
         0.01,
-        Math.random() * CowSettings.positionRadius,
+        -(cowsPosition.position / 2) + Math.random() * cowsPosition.position,
       ]}
+      // position={[2, 1, 1]}
     >
       <group dispose={null} scale={0.15} rotation={[0, Math.random() * 10, 0]}>
         <mesh
