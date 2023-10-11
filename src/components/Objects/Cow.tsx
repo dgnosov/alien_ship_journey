@@ -59,7 +59,6 @@ const Cow: React.FC<IProps> = ({}) => {
         0.01,
         -(cowsPosition.position / 2) + Math.random() * cowsPosition.position,
       ]}
-      // position={[2, 1, 1]}
     >
       <group dispose={null} scale={0.15} rotation={[0, Math.random() * 10, 0]}>
         <mesh
