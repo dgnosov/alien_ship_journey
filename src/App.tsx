@@ -17,7 +17,7 @@ function App() {
       ]}
     >
       <Canvas camera={{ fov: 40 }} shadows={true}>
-        {/* <Perf /> */}
+        <Perf />
         <Scene />
         <Lights />
         <OrbitControls />
