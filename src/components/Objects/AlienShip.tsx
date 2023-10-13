@@ -124,8 +124,8 @@ const AlienShip: React.FC<IProps> = ({}) => {
     smoothedCameraTarget.y -= settings.cameraTarget.y;
     smoothedCameraTarget.x -= settings.cameraTarget.x;
 
-    state.camera.position.copy(smoothedCameraPosition);
-    state.camera.lookAt(smoothedCameraTarget);
+    // state.camera.position.copy(smoothedCameraPosition);
+    // state.camera.lookAt(smoothedCameraTarget);
 
     // Get current rotation coords (The coords after torque)
     const getSpaceshipRBRotationCoords = spaceshipRB.current?.rotation();
