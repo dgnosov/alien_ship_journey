@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Mesh, ShaderMaterial } from "three";
-import { RigidBody } from "@react-three/rapier";
+import { Group, Mesh, ShaderMaterial, Vector3 } from "three";
+import { RapierRigidBody, RigidBody } from "@react-three/rapier";
 import { useControls } from "leva";
+import { useFrame } from "@react-three/fiber";
 
-interface IProps {}
+interface IProps {
+  random: number;
+}
 
 const enum CowSettings {
-  positionRadius = 20,
+  positionRadius = 2,
+  velocity = 2,
   scale = 0.3,
 }
 
@@ -40,11 +44,41 @@ type GLTFResult = GLTF & {
     horn: ShaderMaterial;
   };
 };
-const Cow: React.FC<IProps> = ({}) => {
+const Cow: React.FC<IProps> = ({ random }) => {
   const { nodes, materials } = useGLTF("./models/cow.glb") as GLTFResult;
 
   const cowsPosition = useControls("Cows positions", {
     position: { min: 1, max: 20, value: 20, step: 1 },
+  });
+
+  const cowRef = useRef<Group>(null);
+
+  useFrame((state, delta) => {
+    if (!cowRef.current) return;
+
+    const time = state.clock.getElapsedTime();
+
+    cowRef.current.position.lerp(
+      new Vector3(
+        Math.sin(time / (random * CowSettings.velocity)) *
+          CowSettings.positionRadius,
+        0,
+        Math.cos(time / (random * CowSettings.velocity)) *
+          CowSettings.positionRadius
+      ),
+      1
+    );
+
+    // console.log(cowRef.current.position.x);
+
+    // cowRef.current.position.z -=
+    //   cowRef.current.position.z < 0
+    //     ? Math.cos(time) / 100
+    //     : (cowRef.current.position.x += 0.002);
+
+    // console.log(cowRef.current.position.x);
+    // cowRef.current.position.x += ((Math.random() / 4) * Math.sin(time)) / 600;
+    // cowRef.current.position.z -= (Math.random() * 2 * Math.cos(time)) / 500;
   });
 
   return (
@@ -60,7 +94,12 @@ const Cow: React.FC<IProps> = ({}) => {
         -(cowsPosition.position / 2) + Math.random() * cowsPosition.position,
       ]}
     >
-      <group dispose={null} scale={0.15} rotation={[0, Math.random() * 10, 0]}>
+      <group
+        ref={cowRef}
+        dispose={null}
+        scale={0.15}
+        rotation={[0, Math.random() * 10, 0]}
+      >
         <mesh
           castShadow
           receiveShadow
