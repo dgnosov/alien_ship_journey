@@ -13,7 +13,7 @@ function App() {
         { name: "backward", keys: ["ArrowDown", "KeyS"] },
         { name: "leftward", keys: ["ArrowLeft", "KeyA"] },
         { name: "rightward", keys: ["ArrowRight", "KeyD"] },
-        { name: "portal", keys: ["Space"] },
+        { name: "ray", keys: ["Space"] },
       ]}
     >
       <Canvas camera={{ fov: 40 }} shadows={true}>

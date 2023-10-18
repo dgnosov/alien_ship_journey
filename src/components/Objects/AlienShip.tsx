@@ -1,34 +1,21 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
-import { Group, Mesh, ShaderMaterial, Vector3 } from "three";
-import { GLTF } from "three-stdlib";
+import { Group, Mesh, Vector3 } from "three";
 import { RapierRigidBody, RigidBody } from "@react-three/rapier";
 import { useControls } from "leva";
+import { GLTFAlienSpaceShip } from "../../types/types";
 
 interface IProps {}
-
-type GLTFResult = GLTF & {
-  nodes: {
-    spaceship: Mesh;
-    portal: Mesh;
-    cabine: Mesh;
-    lights: Mesh;
-  };
-  materials: {
-    metalic: ShaderMaterial;
-    glass: ShaderMaterial;
-    lights: ShaderMaterial;
-  };
-};
 
 const AlienShip: React.FC<IProps> = ({}) => {
   const { nodes, materials } = useGLTF(
     "./models/alien_spaceship.glb"
-  ) as GLTFResult;
+  ) as GLTFAlienSpaceShip;
 
   const spaceshipRB = useRef<RapierRigidBody>(null);
   const spaceshipGroup = useRef<Group>(null!);
+  const spaceshipRay = useRef<Mesh>(null);
   const [_, getKeys] = useKeyboardControls();
   const [smoothedCameraPosition] = useState(() => new Vector3());
   const [smoothedCameraTarget] = useState(() => new Vector3());
@@ -61,7 +48,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
     /**
      * Keyboard actions
      */
-    const { forward, backward, leftward, rightward, portal } = getKeys();
+    const { forward, backward, leftward, rightward, ray } = getKeys();
 
     /**
      * Fly phisics of alien space ship
@@ -92,8 +79,12 @@ const AlienShip: React.FC<IProps> = ({}) => {
       torgue.z += torgueStrength;
     }
 
-    if (portal) {
-      console.log("catch", portal);
+    if (ray) {
+      if (!spaceshipRay.current) return;
+      spaceshipRay.current.visible = true;
+    } else {
+      if (!spaceshipRay.current) return;
+      spaceshipRay.current.visible = false;
     }
 
     spaceshipRB.current?.applyImpulse(impulse, true);
@@ -161,6 +152,10 @@ const AlienShip: React.FC<IProps> = ({}) => {
       position={[1, 1, 1]}
     >
       <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
+        <mesh ref={spaceshipRay} position={[0, -1.5, 0]} visible={false}>
+          <coneGeometry args={[1, 4, 10]} />
+          <meshPhongMaterial transparent color="red" opacity={0.5} />
+        </mesh>
         <mesh
           castShadow
           receiveShadow
