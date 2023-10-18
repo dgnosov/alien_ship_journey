@@ -11,7 +11,7 @@ import Rock from "./Objects/Rock";
 type Props = {};
 
 const enum CowsNumber {
-  cows = 5,
+  cows = 2,
 }
 
 // Huge rocks on the corners
@@ -96,13 +96,13 @@ const rocksBorders = [
 
 const Scene: React.FC<Props> = ({}) => {
   return (
-    <Physics debug colliders={false}>
+    <Physics colliders={false}>
       <Ground />
-      {/* <AlienShip /> */}
+      <AlienShip />
       {[...Array(CowsNumber.cows)].map((_, key) => (
-        <Cow key={`c_${key}`} random={key} />
+        <Cow key={`c_${key}`} random={Math.floor(Math.random() * 21) - 10} />
       ))}
-      {/* {rocks.map((rock) => (
+      {rocks.map((rock) => (
         <Rocks
           key={rock.id}
           rotation={rock.rotation}
@@ -119,7 +119,7 @@ const Scene: React.FC<Props> = ({}) => {
           scale={rock.scale}
         />
       ))}
-      <Tree /> */}
+      <Tree />
     </Physics>
   );
 };

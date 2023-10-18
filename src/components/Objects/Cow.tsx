@@ -4,59 +4,44 @@ import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { Group, Mesh, ShaderMaterial } from "three";
 import { RigidBody } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
+import { GLTFCow } from "../../types/types";
 
 interface IProps {
   random: number;
 }
 
-type GLTFResult = GLTF & {
-  nodes: {
-    body: Mesh;
-    eye_main: Mesh;
-    eye_main001: Mesh;
-    nose: Mesh;
-    eye: Mesh;
-    eye001: Mesh;
-    nose_dot: Mesh;
-    nose_dot001: Mesh;
-    leg: Mesh;
-    leg001: Mesh;
-    leg002: Mesh;
-    leg003: Mesh;
-    horn: Mesh;
-    horn001: Mesh;
-    tail: Mesh;
-  };
-  materials: {
-    body: ShaderMaterial;
-    eye_main: ShaderMaterial;
-    eye: ShaderMaterial;
-    nose: ShaderMaterial;
-    nose_dot: ShaderMaterial;
-    leg: ShaderMaterial;
-    horn: ShaderMaterial;
-  };
-};
+const enum CowsSettings {
+  radiusOfCowMovement = 12,
+  speed = 8,
+}
+
 const Cow: React.FC<IProps> = ({ random }) => {
-  const { nodes, materials } = useGLTF("./models/cow.glb") as GLTFResult;
+  const { nodes, materials } = useGLTF("./models/cow.glb") as GLTFCow;
 
   const cowRef = useRef<Group>(null);
 
   useFrame((state, _) => {
     if (!cowRef.current) return;
     const time = state.clock.getElapsedTime();
-    cowRef.current.rotation.y = time / 4;
+    cowRef.current.rotation.y = Math.sin(random) + time / CowsSettings.speed;
   });
 
   return (
-    <group ref={cowRef}>
+    <group
+      ref={cowRef}
+      position={[
+        Math.sin(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+        0,
+        Math.cos(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+      ]}
+    >
       <RigidBody
         gravityScale={4}
         colliders="ball"
         restitution={1}
         linearDamping={0.5}
         angularDamping={2}
-        position={[random, 0, random]}
+        position={[0.5, 0, 0.5]}
       >
         <group dispose={null} scale={0.15} rotation={[0, Math.PI / 4, 0]}>
           <mesh
