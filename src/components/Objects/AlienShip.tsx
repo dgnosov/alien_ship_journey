@@ -1,37 +1,43 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
-import { Group, Mesh, ShaderMaterial, Vector3 } from "three";
-import { GLTF } from "three-stdlib";
-import { RapierRigidBody, RigidBody } from "@react-three/rapier";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
+import {
+  Group,
+  Mesh,
+  Object3D,
+  Object3DEventMap,
+  Vector,
+  Vector3,
+} from "three";
+import {
+  CollisionPayload,
+  RapierRigidBody,
+  RigidBody,
+} from "@react-three/rapier";
 import { useControls } from "leva";
+import { GLTFAlienSpaceShip } from "../../types/types";
 
 interface IProps {}
 
-type GLTFResult = GLTF & {
-  nodes: {
-    spaceship: Mesh;
-    portal: Mesh;
-    cabine: Mesh;
-    lights: Mesh;
-  };
-  materials: {
-    metalic: ShaderMaterial;
-    glass: ShaderMaterial;
-    lights: ShaderMaterial;
-  };
-};
+const enum intersactionTypes {
+  start = "start",
+  exit = "exit",
+}
 
 const AlienShip: React.FC<IProps> = ({}) => {
   const { nodes, materials } = useGLTF(
     "./models/alien_spaceship.glb"
-  ) as GLTFResult;
+  ) as GLTFAlienSpaceShip;
 
   const spaceshipRB = useRef<RapierRigidBody>(null);
-  const spaceshipGroup = useRef<Group>(null!);
+  const spaceshipGroup = useRef<Group>(null);
+  const spaceshipRay = useRef<Mesh>(null);
+  const spaceshipLights = useRef<Mesh>(null);
   const [_, getKeys] = useKeyboardControls();
   const [smoothedCameraPosition] = useState(() => new Vector3());
   const [smoothedCameraTarget] = useState(() => new Vector3());
+
+  const [intersaction, setIntersation] = useState<CollisionPayload>();
 
   // Value for better smootheffect on camera and space ship movement
   const [smoothIndex] = useState(3);
@@ -61,7 +67,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
     /**
      * Keyboard actions
      */
-    const { forward, backward, leftward, rightward, portal } = getKeys();
+    const { forward, backward, leftward, rightward, ray } = getKeys();
 
     /**
      * Fly phisics of alien space ship
@@ -92,8 +98,32 @@ const AlienShip: React.FC<IProps> = ({}) => {
       torgue.z += torgueStrength;
     }
 
-    if (portal) {
-      console.log("catch", portal);
+    if (ray) {
+      if (
+        !spaceshipRay.current ||
+        !spaceshipRB.current
+        // !intersaction?.rigidBodyObject
+      )
+        return;
+      // Turn on the light
+      spaceshipRay.current.visible = true;
+
+      const test = spaceshipRB.current?.translation();
+
+      console.log("test", intersaction);
+      //       event.rigidBodyObject.gravityScale = 10;
+      // event.rigidBodyObject.position.y = 0.4;
+
+      // if (!intersaction?.rigidBodyObject) return;
+      // intersaction.rigidBodyObject.position.y = 0.4;
+      // intersaction.rigidBodyObject.position.x =
+      //   spaceshipRB.current?.translation().x;
+      // intersaction.rigidBodyObject.position.z =
+      //   spaceshipRB.current?.translation().z;
+    } else {
+      if (!spaceshipRay.current) return;
+      // Turn off the light
+      spaceshipRay.current.visible = false;
     }
 
     spaceshipRB.current?.applyImpulse(impulse, true);
@@ -150,6 +180,29 @@ const AlienShip: React.FC<IProps> = ({}) => {
     spaceshipRB.current?.setRotation(convertRotationCoords, true);
   });
 
+  /**
+   * Check if spaceship ray intersect with cow
+   * @param type
+   * @param event
+   * @returns
+   */
+  const checkIntersaction = (type: string, event: CollisionPayload | any) => {
+    if (intersactionTypes.start === type) {
+      if (!event.rigidBodyObject) return;
+      setIntersation(event);
+      return;
+    }
+
+    setIntersation(undefined);
+  };
+
+  /**
+   * TODO
+   * 1. При начале соприкосновение запишем данные в state
+   * 2. При нажатии на пробел, проверим есть ли объект пересения
+   *    и изменим у него
+   */
+
   return (
     <RigidBody
       gravityScale={0}
@@ -159,8 +212,16 @@ const AlienShip: React.FC<IProps> = ({}) => {
       linearDamping={0.5}
       angularDamping={2}
       position={[1, 1, 1]}
+      name="alien_spaceship"
+      onIntersectionEnter={(e) => checkIntersaction(intersactionTypes.start, e)}
+      onIntersectionExit={(e) => checkIntersaction(intersactionTypes.exit, e)}
+      sensor
     >
       <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
+        <mesh ref={spaceshipRay} position={[0, -1.5, 0]} visible={true}>
+          <coneGeometry args={[1, 4, 10]} />
+          <meshPhongMaterial transparent color="red" opacity={0.5} />
+        </mesh>
         <mesh
           castShadow
           receiveShadow
@@ -183,6 +244,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
           position={[0, -0.028, 0]}
         />
         <mesh
+          ref={spaceshipLights}
           castShadow
           receiveShadow
           geometry={nodes.lights.geometry}
