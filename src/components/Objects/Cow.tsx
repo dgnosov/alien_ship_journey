@@ -8,6 +8,7 @@ import { GLTFCow } from "../../types/types";
 
 interface IProps {
   random: number;
+  index: number;
 }
 
 const enum CowsSettings {
@@ -15,7 +16,7 @@ const enum CowsSettings {
   speed = 8,
 }
 
-const Cow: React.FC<IProps> = ({ random }) => {
+const Cow: React.FC<IProps> = ({ random, index }) => {
   const { nodes, materials } = useGLTF("./models/cow.glb") as GLTFCow;
 
   const cowRef = useRef<Group>(null);
@@ -23,17 +24,18 @@ const Cow: React.FC<IProps> = ({ random }) => {
   useFrame((state, _) => {
     if (!cowRef.current) return;
     const time = state.clock.getElapsedTime();
-    cowRef.current.rotation.y = Math.sin(random) + time / CowsSettings.speed;
+    // cowRef.current.rotation.y = Math.sin(random) + time / CowsSettings.speed;
   });
 
   return (
     <group
       ref={cowRef}
-      position={[
-        Math.sin(random) * Math.random() * CowsSettings.radiusOfCowMovement,
-        0,
-        Math.cos(random) * Math.random() * CowsSettings.radiusOfCowMovement,
-      ]}
+      // position={[
+      //   Math.sin(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+      //   0,
+      //   Math.cos(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+      // ]}
+      name={`cow_${index}`}
     >
       <RigidBody
         gravityScale={4}
@@ -41,7 +43,8 @@ const Cow: React.FC<IProps> = ({ random }) => {
         restitution={1}
         linearDamping={0.5}
         angularDamping={2}
-        position={[0.5, 0, 0.5]}
+        // position={[0.5, 0, 0.5]}
+        name={`cow_${index}`}
       >
         <group dispose={null} scale={0.15} rotation={[0, Math.PI / 4, 0]}>
           <mesh
