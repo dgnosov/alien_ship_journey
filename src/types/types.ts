@@ -29,3 +29,17 @@ export type GLTFCow = GLTF & {
     horn: ShaderMaterial;
   };
 };
+
+export type GLTFAlienSpaceShip = GLTF & {
+  nodes: {
+    spaceship: Mesh;
+    portal: Mesh;
+    cabine: Mesh;
+    lights: Mesh;
+  };
+  materials: {
+    metalic: ShaderMaterial;
+    glass: ShaderMaterial;
+    lights: ShaderMaterial;
+  };
+};
