@@ -1,14 +1,7 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import {
-  Group,
-  Mesh,
-  Object3D,
-  Object3DEventMap,
-  Vector,
-  Vector3,
-} from "three";
+import { useFrame } from "@react-three/fiber";
+import { useRef, useState } from "react";
+import { Group, Mesh, Vector3 } from "three";
 import {
   CollisionPayload,
   RapierRigidBody,
@@ -18,11 +11,6 @@ import { useControls } from "leva";
 import { GLTFAlienSpaceShip } from "../../types/types";
 
 interface IProps {}
-
-const enum intersactionTypes {
-  start = "start",
-  exit = "exit",
-}
 
 const AlienShip: React.FC<IProps> = ({}) => {
   const { nodes, materials } = useGLTF(
@@ -99,31 +87,17 @@ const AlienShip: React.FC<IProps> = ({}) => {
     }
 
     if (ray) {
-      if (
-        !spaceshipRay.current ||
-        !spaceshipRB.current
-        // !intersaction?.rigidBodyObject
-      )
-        return;
+      if (!spaceshipRay.current) return;
       // Turn on the light
       spaceshipRay.current.visible = true;
-
-      const test = spaceshipRB.current?.translation();
-
-      console.log("test", intersaction);
-      //       event.rigidBodyObject.gravityScale = 10;
-      // event.rigidBodyObject.position.y = 0.4;
-
-      // if (!intersaction?.rigidBodyObject) return;
-      // intersaction.rigidBodyObject.position.y = 0.4;
-      // intersaction.rigidBodyObject.position.x =
-      //   spaceshipRB.current?.translation().x;
-      // intersaction.rigidBodyObject.position.z =
-      //   spaceshipRB.current?.translation().z;
+      updateCowsPosition();
     } else {
       if (!spaceshipRay.current) return;
       // Turn off the light
       spaceshipRay.current.visible = false;
+
+      // Reset intersaction on ray off
+      setIntersation(undefined);
     }
 
     spaceshipRB.current?.applyImpulse(impulse, true);
@@ -154,6 +128,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
     smoothedCameraTarget.y -= settings.cameraTarget.y;
     smoothedCameraTarget.x -= settings.cameraTarget.x;
 
+    // Set fixed camera position
     // state.camera.position.copy(smoothedCameraPosition);
     // state.camera.lookAt(smoothedCameraTarget);
 
@@ -174,34 +149,30 @@ const AlienShip: React.FC<IProps> = ({}) => {
     // Initial rotation coords of Alien sheep is {x: 0, y: 0, z: 0}
     // After torque aproxiamte coords is the following {x: 0.55512, y: 0.132154, z: 0.087879}
     // So we need smoothly reset it to 0
-    // In this case we use -= delta
+    // In this case we use -= delta on Y axis
     convertRotationCoords.y -= delta;
 
     spaceshipRB.current?.setRotation(convertRotationCoords, true);
   });
 
   /**
-   * Check if spaceship ray intersect with cow
-   * @param type
-   * @param event
-   * @returns
+   * Method to update cow's position when ship ray above the cow
+   * @returns undefined
    */
-  const checkIntersaction = (type: string, event: CollisionPayload | any) => {
-    if (intersactionTypes.start === type) {
-      if (!event.rigidBodyObject) return;
-      setIntersation(event);
-      return;
-    }
+  const updateCowsPosition = () => {
+    if (!intersaction?.rigidBody || !spaceshipRB.current) return;
 
-    setIntersation(undefined);
+    intersaction.rigidBody.setTranslation(
+      new Vector3(
+        spaceshipRB.current.translation().x,
+        spaceshipRB.current.translation().y - 0.5,
+        spaceshipRB.current.translation().z
+      ),
+      true
+    );
+
+    intersaction.rigidBody.setGravityScale(0.1, true);
   };
-
-  /**
-   * TODO
-   * 1. При начале соприкосновение запишем данные в state
-   * 2. При нажатии на пробел, проверим есть ли объект пересения
-   *    и изменим у него
-   */
 
   return (
     <RigidBody
@@ -213,14 +184,14 @@ const AlienShip: React.FC<IProps> = ({}) => {
       angularDamping={2}
       position={[1, 1, 1]}
       name="alien_spaceship"
-      onIntersectionEnter={(e) => checkIntersaction(intersactionTypes.start, e)}
-      onIntersectionExit={(e) => checkIntersaction(intersactionTypes.exit, e)}
+      onIntersectionEnter={(e) => setIntersation(e)}
+      onIntersectionExit={(e) => setIntersation(e)}
       sensor
     >
       <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
-        <mesh ref={spaceshipRay} position={[0, -1.5, 0]} visible={true}>
-          <coneGeometry args={[1, 4, 10]} />
-          <meshPhongMaterial transparent color="red" opacity={0.5} />
+        <mesh ref={spaceshipRay} position={[0, -2, 0]} visible={true}>
+          <coneGeometry args={[2, 4, 10]} />
+          <meshPhongMaterial transparent color="purple" opacity={0.3} />
         </mesh>
         <mesh
           castShadow
