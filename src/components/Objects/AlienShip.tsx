@@ -1,5 +1,5 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import { Group, Mesh, Vector3 } from "three";
 import {
@@ -24,6 +24,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
   const [_, getKeys] = useKeyboardControls();
   const [smoothedCameraPosition] = useState(() => new Vector3());
   const [smoothedCameraTarget] = useState(() => new Vector3());
+  const [YCoord, setYCoord] = useState(0);
 
   const [intersaction, setIntersation] = useState<CollisionPayload>();
 
@@ -50,7 +51,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
     if (!spaceshipGroup.current) return;
     spaceshipGroup.current.rotateY(delta * 0.5);
     const time = state.clock.getElapsedTime();
-    spaceshipGroup.current.position.y = Math.sin(time) / 10.0;
+    spaceshipGroup.current.position.y = Math.sin(time) / 20.0;
 
     /**
      * Keyboard actions
@@ -90,14 +91,12 @@ const AlienShip: React.FC<IProps> = ({}) => {
       if (!spaceshipRay.current) return;
       // Turn on the light
       spaceshipRay.current.visible = true;
-      updateCowsPosition();
+      updateCowsPosition(delta);
     } else {
       if (!spaceshipRay.current) return;
       // Turn off the light
       spaceshipRay.current.visible = false;
-
-      // Reset intersaction on ray off
-      setIntersation(undefined);
+      reset();
     }
 
     spaceshipRB.current?.applyImpulse(impulse, true);
@@ -156,22 +155,50 @@ const AlienShip: React.FC<IProps> = ({}) => {
   });
 
   /**
+   * Reset cows to initial state
+   * @returns
+   */
+  const reset = () => {
+    setIntersation(undefined);
+    setYCoord(0);
+    if (!intersaction?.rigidBody) return;
+    intersaction.rigidBody.setGravityScale(1, false);
+  };
+
+  /**
    * Method to update cow's position when ship ray above the cow
    * @returns undefined
    */
-  const updateCowsPosition = () => {
+  const updateCowsPosition = (delta: number) => {
     if (!intersaction?.rigidBody || !spaceshipRB.current) return;
 
-    intersaction.rigidBody.setTranslation(
-      new Vector3(
-        spaceshipRB.current.translation().x,
-        spaceshipRB.current.translation().y - 0.5,
-        spaceshipRB.current.translation().z
-      ),
-      true
+    const positionInsideRay = 0.3;
+
+    const spaceshipCoords = new Vector3(
+      spaceshipRB.current.translation().x,
+      YCoord,
+      spaceshipRB.current.translation().z
     );
 
-    intersaction.rigidBody.setGravityScale(0.1, true);
+    intersaction.rigidBody.setTranslation(spaceshipCoords, true);
+    intersaction.rigidBody.setGravityScale(0.005, false);
+
+    if (YCoord >= positionInsideRay) {
+      setYCoord(positionInsideRay);
+      return;
+    }
+
+    setYCoord((prev) => (prev += delta / 2));
+  };
+
+  /**
+   * We can take only one cow
+   * @param e -CollisionPayload
+   * @returns
+   */
+  const checkIntersaction = (e: CollisionPayload) => {
+    if (intersaction) return;
+    setIntersation(e);
   };
 
   return (
@@ -184,15 +211,17 @@ const AlienShip: React.FC<IProps> = ({}) => {
       angularDamping={2}
       position={[1, 1, 1]}
       name="alien_spaceship"
-      onIntersectionEnter={(e) => setIntersation(e)}
-      onIntersectionExit={(e) => setIntersation(e)}
+      onIntersectionEnter={(e) => checkIntersaction(e)}
+      onIntersectionExit={(e) => checkIntersaction(e)}
       sensor
     >
       <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
-        <mesh ref={spaceshipRay} position={[0, -2, 0]} visible={true}>
-          <coneGeometry args={[2, 4, 10]} />
-          <meshPhongMaterial transparent color="purple" opacity={0.3} />
-        </mesh>
+        <group position={[0, -1.2, 0]} visible={true}>
+          <mesh ref={spaceshipRay}>
+            <coneGeometry args={[1, 4, 10]} />
+            <meshPhongMaterial transparent color="red" opacity={0.5} />
+          </mesh>
+        </group>
         <mesh
           castShadow
           receiveShadow
@@ -216,6 +245,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
         />
         <mesh
           ref={spaceshipLights}
+          name="lights"
           castShadow
           receiveShadow
           geometry={nodes.lights.geometry}
