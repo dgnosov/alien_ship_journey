@@ -1,4 +1,4 @@
-import { Mesh, ShaderMaterial } from "three";
+import { Mesh, MeshBasicMaterial, ShaderMaterial } from "three";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 export type GLTFCow = GLTF & {
@@ -40,6 +40,6 @@ export type GLTFAlienSpaceShip = GLTF & {
   materials: {
     metalic: ShaderMaterial;
     glass: ShaderMaterial;
-    lights: ShaderMaterial;
+    lights: MeshBasicMaterial;
   };
 };

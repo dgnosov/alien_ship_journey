@@ -30,11 +30,11 @@ const Cow: React.FC<IProps> = ({ random, index }) => {
   return (
     <group
       ref={cowRef}
-      // position={[
-      //   Math.sin(random) * Math.random() * CowsSettings.radiusOfCowMovement,
-      //   0,
-      //   Math.cos(random) * Math.random() * CowsSettings.radiusOfCowMovement,
-      // ]}
+      position={[
+        Math.sin(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+        0,
+        Math.cos(random) * Math.random() * CowsSettings.radiusOfCowMovement,
+      ]}
       name={`cow_${index}`}
     >
       <RigidBody
@@ -43,10 +43,10 @@ const Cow: React.FC<IProps> = ({ random, index }) => {
         restitution={1}
         linearDamping={0.5}
         angularDamping={2}
-        // position={[0.5, 0, 0.5]}
+        position={[0.5, 0, 0.5]}
         name={`cow_${index}`}
       >
-        <group dispose={null} scale={0.15} rotation={[0, Math.PI / 4, 0]}>
+        <group dispose={null} scale={0.1} rotation={[0, Math.PI / 4, 0]}>
           <mesh
             castShadow
             receiveShadow

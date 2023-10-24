@@ -11,7 +11,7 @@ import Rock from "./Objects/Rock";
 type Props = {};
 
 const enum CowsNumber {
-  cows = 1,
+  cows = 10,
 }
 
 // Huge rocks on the corners
