@@ -1,7 +1,7 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
-import { Group, Mesh, Vector, Vector3 } from "three";
+import { Group, Mesh, Vector3 } from "three";
 import {
   CollisionPayload,
   RapierRigidBody,
@@ -9,7 +9,6 @@ import {
 } from "@react-three/rapier";
 import { useControls } from "leva";
 import { GLTFAlienSpaceShip } from "../../types/types";
-import { useSpring, animated } from "@react-spring/three";
 
 interface IProps {}
 
@@ -148,8 +147,8 @@ const AlienShip: React.FC<IProps> = ({}) => {
     smoothedCameraTarget.x -= settings.cameraTarget.x;
 
     // Set fixed camera position
-    state.camera.position.copy(smoothedCameraPosition);
-    state.camera.lookAt(smoothedCameraTarget);
+    // state.camera.position.copy(smoothedCameraPosition);
+    // state.camera.lookAt(smoothedCameraTarget);
 
     // Get current rotation coords (The coords after torque)
     const getSpaceshipRBRotationCoords = spaceshipRB.current?.rotation();
@@ -311,7 +310,7 @@ const AlienShip: React.FC<IProps> = ({}) => {
       <group ref={spaceshipGroup} dispose={null} scale={0.3} castShadow>
         <group position={[0, -1.2, 0]} visible={true}>
           <mesh ref={spaceshipRay}>
-            <coneGeometry args={[1, 4, 10]} />
+            <coneGeometry args={[1, 4.5, 10]} />
             <meshPhongMaterial transparent color="red" opacity={0.5} />
           </mesh>
         </group>
