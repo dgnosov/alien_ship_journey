@@ -7,11 +7,12 @@ import Rocks from "./Objects/Rocks";
 import Tree from "./Objects/Tree";
 import { Euler, Vector3 } from "three";
 import Rock from "./Objects/Rock";
+import Corral from "./Objects/Corral";
 
 type Props = {};
 
-const enum CowsNumber {
-  cows = 10,
+export const enum CowsNumber {
+  cows = 5,
 }
 
 // Huge rocks on the corners
@@ -96,7 +97,7 @@ const rocksBorders = [
 
 const Scene: React.FC<Props> = ({}) => {
   return (
-    <Physics colliders={false}>
+    <Physics debug colliders={false}>
       <Ground />
       <AlienShip />
       {[...Array(CowsNumber.cows)].map((_, key) => (
@@ -124,6 +125,7 @@ const Scene: React.FC<Props> = ({}) => {
         />
       ))}
       {/* <Tree /> */}
+      <Corral />
     </Physics>
   );
 };

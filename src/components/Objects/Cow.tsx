@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Group, Mesh, ShaderMaterial } from "three";
+import { Group } from "three";
 import { RigidBody } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
 import { GLTFCow } from "../../types/types";
